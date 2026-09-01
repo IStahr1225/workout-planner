@@ -1,4 +1,4 @@
-const CACHE_NAME = 'training-log-v1';
+const CACHE_NAME = 'training-log-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
@@ -24,18 +24,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first: always try to get the latest version when online,
+// and only fall back to the cached copy when there's no connection.
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        // Cache new same-origin GET requests as we see them
-        if (event.request.method === 'GET' && response.ok) {
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
         return response;
-      }).catch(() => cached);
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
