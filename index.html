@@ -417,7 +417,59 @@ const DEFAULT_WORKOUTS = [
   {id:'w_default_6', name:'15-Minute Core & Stability', type:'Mobility', duration:15,
     details:'3 rounds, 40s work / 20s rest:\nPlank\nSide plank (each side)\nBird dog (alternating)\nDead bug\nBicycle crunches\nSuperman hold'},
   {id:'w_default_7', name:'5-Minute Morning Wake-Up', type:'Mobility', duration:5,
-    details:'Once through, no rest:\n10 bodyweight squats\n10 arm circles each way\n10 standing back extensions\n10 walking lunges\n30s plank\n10 deep breaths overhead'}
+    details:'Once through, no rest:\n10 bodyweight squats\n10 arm circles each way\n10 standing back extensions\n10 walking lunges\n30s plank\n10 deep breaths overhead'},
+
+  // Chest
+  {id:'w_default_8', name:'Chest – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nWall push-ups\nIncline push-ups (hands on couch/step)\nChest squeeze hold, 10s x5'},
+  {id:'w_default_9', name:'Chest – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nStandard push-ups\nWide push-ups\nIncline push-ups\nChest squeeze hold'},
+  {id:'w_default_10', name:'Chest – Hard', type:'Strength', duration:15,
+    details:'4 rounds, 40s work / 15s rest:\nDecline push-ups (feet elevated)\nDiamond push-ups\nArcher push-ups\nExplosive push-ups'},
+
+  // Back
+  {id:'w_default_11', name:'Back – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nSuperman hold\nBird dog (alternating)\nProne Y raises'},
+  {id:'w_default_12', name:'Back – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nSuperman pulses\nReverse snow angels\nProne T raises\nBird dog'},
+  {id:'w_default_13', name:'Back – Hard', type:'Strength', duration:15,
+    details:'4 rounds, 40s work / 15s rest:\nSuperman alternating limb lifts\nProne W raises\nSwimmers\nSingle-arm reach superman'},
+
+  // Shoulders
+  {id:'w_default_14', name:'Shoulders – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nArm circles, forward and back\nPike shoulder taps\nWall handstand hold, short'},
+  {id:'w_default_15', name:'Shoulders – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nPike push-ups (knees bent)\nPlank shoulder taps\nLateral raise holds'},
+  {id:'w_default_16', name:'Shoulders – Hard', type:'Strength', duration:15,
+    details:'4 rounds, 40s work / 15s rest:\nFull pike push-ups\nWall walk hold\nPlank-to-downdog\nPike shoulder taps'},
+
+  // Arms
+  {id:'w_default_17', name:'Arms – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nWall push-ups\nChair tricep dips, small range\nStatic bicep flex hold'},
+  {id:'w_default_18', name:'Arms – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nDiamond push-ups\nChair dips\nPlank up-downs'},
+  {id:'w_default_19', name:'Arms – Hard', type:'Strength', duration:15,
+    details:'4 rounds, 40s work / 15s rest:\nClose-grip push-ups\nDecline tricep dips\nExplosive plank up-downs'},
+
+  // Legs
+  {id:'w_default_20', name:'Legs – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nBodyweight squats\nStanding calf raises\nGlute bridges'},
+  {id:'w_default_21', name:'Legs – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nWalking lunges\nWall sit\nGlute bridges\nCalf raises'},
+  {id:'w_default_22', name:'Legs – Hard', type:'Strength', duration:18,
+    details:'4 rounds, 45s work / 15s rest:\nJump lunges\nBulgarian split squats\nSquat jumps\nWall sit'},
+
+  // Core
+  {id:'w_default_23', name:'Core – Easy', type:'Strength', duration:8,
+    details:'3 rounds, 30s work / 20s rest:\nPlank hold\nDead bug\nSlow bicycle crunches'},
+  {id:'w_default_24', name:'Core – Moderate', type:'Strength', duration:12,
+    details:'3 rounds, 40s work / 20s rest:\nSide plank, each side\nRussian twists\nMountain climbers\nV-ups'},
+  {id:'w_default_25', name:'Core – Hard', type:'Strength', duration:15,
+    details:'4 rounds, 40s work / 15s rest:\nHollow body hold\nPlank with leg lift\nV-ups\nSide plank hip dips'},
+
+  // Cardio
+  {id:'w_default_26', name:'Cardio – Full Body Blast', type:'Cardio', duration:12,
+    details:'4 rounds, 40s work / 20s rest:\nJumping jacks\nHigh knees\nBurpees\nMountain climbers\nSquat jumps'}
 ];
 
 async function loadData(){
@@ -448,6 +500,15 @@ function addWorkout(w){
   saveWorkouts();
   render();
 }
+function restoreDefaults(){
+  const existingIds = new Set(workouts.map(w=>w.id));
+  const missing = DEFAULT_WORKOUTS.filter(w=>!existingIds.has(w.id));
+  if(missing.length === 0) return;
+  workouts = [...workouts, ...missing.map(w=>({...w}))];
+  saveWorkouts();
+  render();
+}
+
 function deleteWorkout(id){
   workouts = workouts.filter(w=>w.id!==id);
   Object.keys(assignments).forEach(k=>{
@@ -594,7 +655,10 @@ function render(){
 
     <div class="lib-head">
       <h2>Workout library</h2>
-      <button class="add-btn" onclick="openAddWorkout()">+ Add workout</button>
+      <div style="display:flex; gap:8px;">
+        <button class="add-btn" style="background:none;color:var(--ink-soft);border:1px solid var(--line);" onclick="restoreDefaults()">Restore defaults</button>
+        <button class="add-btn" onclick="openAddWorkout()">+ Add workout</button>
+      </div>
     </div>
     <div class="workout-list">${libItems}</div>
     ${modalHtml}
