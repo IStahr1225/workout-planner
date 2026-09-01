@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Training Log</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16211B">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF0E8;
+    --ink: #16211B;
+    --ink-soft: #4B564D;
+    --accent: #2F5FE0;
+    --accent-soft: #E7ECFB;
+    --warm: #E8A33D;
+    --warm-soft: #FBEDD6;
+    --card: #FFFFFF;
+    --line: #D8DCD0;
+    --danger: #C4462B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 60px;
+  }
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:800;
+    font-size:34px;
+    letter-spacing:0.3px;
+    margin:0;
+    line-height:1;
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:13px;
+    margin-top:4px;
+  }
+  /* Calendar */
+  .cal-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:22px;
+  }
+  .cal-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .cal-nav button{
+    border:none;
+    background:none;
+    font-size:20px;
+    color:var(--ink);
+    cursor:pointer;
+    padding:4px 10px;
+    border-radius:8px;
+  }
+  .cal-nav button:hover{background:var(--bg);}
+  .cal-month{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:22px;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+  }
+  .cal-dow{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    font-weight:600;
+    padding-bottom:4px;
+  }
+  .cal-day{
+    aspect-ratio:1/1;
+    border-radius:9px;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:5px 2px 3px;
+    cursor:pointer;
+    position:relative;
+    border:1px solid transparent;
+  }
+  .cal-day.empty{background:none;cursor:default;}
+  .cal-day:not(.empty):hover{border-color:var(--accent);}
+  .cal-day.today{background:var(--warm-soft);}
+  .cal-day .num{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:16px;
+  }
+  .cal-day .dots{
+    display:flex;
+    gap:2px;
+    margin-top:3px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .cal-day .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+  }
+  /* Library */
+  .lib-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  h2{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    margin:0;
+  }
+  .add-btn{
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:20px;
+    padding:8px 16px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .add-btn:hover{opacity:0.85;}
+  .workout-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .workout-item{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .workout-info{display:flex;flex-direction:column;gap:2px;}
+  .workout-name{font-weight:600;font-size:15px;}
+  .workout-meta{font-size:12px;color:var(--ink-soft);}
+  .tag{
+    display:inline-block;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-size:11px;
+    font-weight:600;
+    padding:2px 8px;
+    border-radius:10px;
+    margin-right:6px;
+  }
+  .icon-btn{
+    border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:15px;padding:4px 6px;
+  }
+  .icon-btn:hover{color:var(--danger);}
+  .workout-item{flex-direction:column;align-items:stretch;}
+  .workout-top{display:flex;align-items:center;gap:10px;}
+  .workout-info{flex:1;cursor:pointer;min-width:0;}
+  .drag-handle{
+    cursor:grab;
+    font-size:18px;
+    line-height:1;
+    color:var(--ink-soft);
+    padding:6px 4px;
+    touch-action:none;
+    user-select:none;
+    flex-shrink:0;
+  }
+  .drag-handle:active{cursor:grabbing;color:var(--accent);}
+  .drag-ghost{
+    position:fixed;
+    z-index:999;
+    pointer-events:none;
+    background:var(--ink);
+    color:#fff;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:600;
+    box-shadow:0 10px 26px rgba(0,0,0,0.28);
+    transform:translate(-50%,-50%);
+    white-space:nowrap;
+  }
+  .cal-day.drag-target{
+    outline:2px solid var(--accent);
+    outline-offset:-2px;
+    background:var(--accent-soft);
+  }
+  .workout-details{
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px solid var(--line);
+    font-size:13px;
+    color:var(--ink-soft);
+    white-space:pre-line;
+    line-height:1.6;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:24px 10px;
+    border:1px dashed var(--line);
+    border-radius:12px;
+  }
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(22,33,27,0.45);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:50;
+  }
+  .sheet{
+    background:var(--card);
+    width:100%;
+    max-width:640px;
+    border-radius:18px 18px 0 0;
+    padding:20px 18px 26px;
+    max-height:80vh;
+    overflow-y:auto;
+  }
+  .sheet-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;
+  }
+  .sheet-title{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:20px;
+  }
+  .close-x{border:none;background:none;font-size:20px;color:var(--ink-soft);cursor:pointer;}
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:12px 0 5px;
+  }
+  textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    resize:vertical;
+  }
+  input[type=text], input[type=number], select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .save-btn{
+    margin-top:18px;
+    width:100%;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .assign-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+  .assign-item{
+    display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .assign-item.checked{border-color:var(--accent);background:var(--accent-soft);}
+  .assign-item .name{font-weight:600;font-size:14px;}
+  .checkbox{
+    width:20px;height:20px;border-radius:6px;border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    cursor:pointer;
+  }
+  .assign-item.checked .checkbox{background:var(--accent);border-color:var(--accent);color:#fff;font-size:13px;}
+  .loading{text-align:center;color:var(--ink-soft);font-size:13px;padding:30px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading">Loading your training log…</div>
+</div>
+
+<script>
+const TYPES = ["Strength","Cardio","Mobility","Rest"];
+const DOW = ["S","M","T","W","T","F","S"];
+
+let workouts = [];
+let assignments = {}; // dateKey -> [workoutId,...]
+let viewYear, viewMonth;
+let modal = null; // 'addWorkout' | { type:'assign', dateKey }
+let openDetailId = null;
+
+function toggleDetails(id){
+  openDetailId = openDetailId === id ? null : id;
+  render();
+}
+
+let dragState = null;
+
+function startDrag(e, workoutId){
+  e.preventDefault();
+  const w = workouts.find(x=>x.id===workoutId);
+  if(!w) return;
+  const ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.textContent = w.name;
+  document.body.appendChild(ghost);
+  ghost.style.left = e.clientX + 'px';
+  ghost.style.top = e.clientY + 'px';
+  dragState = { id: workoutId, ghost, lastTarget: null };
+  document.addEventListener('pointermove', onDragMove, {passive:false});
+  document.addEventListener('pointerup', onDragEnd, {passive:false});
+  document.addEventListener('pointercancel', onDragEnd, {passive:false});
+}
+
+function onDragMove(e){
+  if(!dragState) return;
+  e.preventDefault();
+  dragState.ghost.style.left = e.clientX + 'px';
+  dragState.ghost.style.top = e.clientY + 'px';
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const dayEl = el ? el.closest('.cal-day:not(.empty)') : null;
+  if(dragState.lastTarget && dragState.lastTarget !== dayEl){
+    dragState.lastTarget.classList.remove('drag-target');
+  }
+  if(dayEl) dayEl.classList.add('drag-target');
+  dragState.lastTarget = dayEl;
+}
+
+function onDragEnd(e){
+  if(!dragState) return;
+  e.preventDefault();
+  const { id, ghost, lastTarget } = dragState;
+  if(lastTarget){
+    lastTarget.classList.remove('drag-target');
+    const dateK = lastTarget.dataset.date;
+    if(dateK){
+      const list = assignments[dateK] || [];
+      if(!list.includes(id)){
+        assignments[dateK] = [...list, id];
+        saveAssignments();
+      }
+    }
+  }
+  ghost.remove();
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.removeEventListener('pointercancel', onDragEnd);
+  dragState = null;
+  render();
+}
+
+const todayObj = new Date();
+viewYear = todayObj.getFullYear();
+viewMonth = todayObj.getMonth();
+
+function dateKey(y,m,d){
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+const DEFAULT_WORKOUTS = [
+  {id:'w_default_1', name:'5-Minute Express (AMRAP)', type:'Cardio', duration:5,
+    details:'As many rounds as possible in 5 min:\n10 squats\n10 push-ups\n10 sit-ups\n10 jumping jacks'},
+  {id:'w_default_2', name:'10-Minute Starter', type:'Strength', duration:10,
+    details:'3 rounds, 40s work / 20s rest:\nBodyweight squats\nPush-ups\nReverse lunges (alternating)\nPlank hold\nGlute bridges'},
+  {id:'w_default_3', name:'15-Minute Full Body', type:'Strength', duration:15,
+    details:'4 rounds, 45s work / 15s rest:\nJumping jacks\nPush-ups\nSquats\nMountain climbers\nSuperman holds\nPlank'},
+  {id:'w_default_4', name:'20-Minute Strength Focus', type:'Strength', duration:20,
+    details:'3 rounds, rest 60-90s between:\n15 squats\n12 push-ups\n10 lunges per leg\n15 glute bridges\n20 bicycle crunches\n30s plank'},
+  {id:'w_default_5', name:'10-Minute Cardio Burner', type:'Cardio', duration:10,
+    details:'4 rounds, 30s work / 15s rest:\nHigh knees\nBurpees\nJumping jacks\nMountain climbers\nSquat jumps'},
+  {id:'w_default_6', name:'15-Minute Core & Stability', type:'Mobility', duration:15,
+    details:'3 rounds, 40s work / 20s rest:\nPlank\nSide plank (each side)\nBird dog (alternating)\nDead bug\nBicycle crunches\nSuperman hold'},
+  {id:'w_default_7', name:'5-Minute Morning Wake-Up', type:'Mobility', duration:5,
+    details:'Once through, no rest:\n10 bodyweight squats\n10 arm circles each way\n10 standing back extensions\n10 walking lunges\n30s plank\n10 deep breaths overhead'}
+];
+
+async function loadData(){
+  try{
+    const w = localStorage.getItem('workouts');
+    workouts = w ? JSON.parse(w) : null;
+  }catch(e){ workouts = null; }
+  if(workouts === null){
+    workouts = DEFAULT_WORKOUTS.map(w=>({...w}));
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+  }
+  try{
+    const a = localStorage.getItem('assignments');
+    assignments = a ? JSON.parse(a) : {};
+  }catch(e){ assignments = {}; }
+  render();
+}
+
+async function saveWorkouts(){
+  localStorage.setItem('workouts', JSON.stringify(workouts));
+}
+async function saveAssignments(){
+  localStorage.setItem('assignments', JSON.stringify(assignments));
+}
+
+function addWorkout(w){
+  workouts.push({id:'w_'+Date.now(), ...w});
+  saveWorkouts();
+  render();
+}
+function deleteWorkout(id){
+  workouts = workouts.filter(w=>w.id!==id);
+  Object.keys(assignments).forEach(k=>{
+    assignments[k] = assignments[k].filter(wid=>wid!==id);
+    if(assignments[k].length===0) delete assignments[k];
+  });
+  saveWorkouts();
+  saveAssignments();
+  render();
+}
+function toggleAssign(dateK, workoutId){
+  const list = assignments[dateK] || [];
+  if(list.includes(workoutId)){
+    assignments[dateK] = list.filter(id=>id!==workoutId);
+    if(assignments[dateK].length===0) delete assignments[dateK];
+  } else {
+    assignments[dateK] = [...list, workoutId];
+  }
+  saveAssignments();
+  render();
+}
+
+function changeMonth(delta){
+  viewMonth += delta;
+  if(viewMonth<0){viewMonth=11;viewYear--;}
+  if(viewMonth>11){viewMonth=0;viewYear++;}
+  render();
+}
+
+function openAddWorkout(){ modal = 'addWorkout'; render(); }
+function openAssign(dateK){ modal = {type:'assign', dateKey:dateK}; render(); }
+function closeModal(){ modal = null; render(); }
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(){
+  const app = document.getElementById('app');
+  const monthName = new Date(viewYear, viewMonth, 1).toLocaleString('default',{month:'long'});
+  const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+
+  let calCells = '';
+  DOW.forEach(d=> calCells += `<div class="cal-dow">${d}</div>`);
+  for(let i=0;i<firstDow;i++) calCells += `<div class="cal-day empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const k = dateKey(viewYear, viewMonth, d);
+    const isToday = k === dateKey(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+    const list = assignments[k] || [];
+    const dots = list.slice(0,4).map(()=>`<div class="dot"></div>`).join('');
+    calCells += `<div class="cal-day ${isToday?'today':''}" data-date="${k}" onclick="openAssign('${k}')">
+      <div class="num">${d}</div>
+      <div class="dots">${dots}</div>
+    </div>`;
+  }
+
+  let libItems = '';
+  if(workouts.length===0){
+    libItems = `<div class="empty-state">No workouts yet. Add your first one to start building your library.</div>`;
+  } else {
+    libItems = workouts.map(w => `
+      <div class="workout-item">
+        <div class="workout-top">
+          <span class="drag-handle" onpointerdown="startDrag(event,'${w.id}')" title="Drag to a day">⠿</span>
+          <div class="workout-info" onclick="toggleDetails('${w.id}')">
+            <div class="workout-name">${escapeHtml(w.name)}</div>
+            <div class="workout-meta"><span class="tag">${w.type}</span>${w.duration ? w.duration+' min' : ''}</div>
+          </div>
+          <button class="icon-btn" onclick="deleteWorkout('${w.id}')" title="Delete">✕</button>
+        </div>
+        ${(w.details && openDetailId===w.id) ? `<div class="workout-details">${escapeHtml(w.details)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  let modalHtml = '';
+  if(modal === 'addWorkout'){
+    modalHtml = `
+    <div class="overlay" onclick="if(event.target===this)closeModal()">
+      <div class="sheet">
+        <div class="sheet-head">
+          <div class="sheet-title">New workout</div>
+          <button class="close-x" onclick="closeModal()">✕</button>
+        </div>
+        <label>Name</label>
+        <input type="text" id="wName" placeholder="e.g. Upper body strength">
+        <div class="row2">
+          <div>
+            <label>Type</label>
+            <select id="wType">${TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
+          </div>
+          <div>
+            <label>Duration (min)</label>
+            <input type="number" id="wDuration" placeholder="45">
+          </div>
+        </div>
+        <label>Exercises (optional, one per line)</label>
+        <textarea id="wDetails" rows="4" placeholder="10 squats&#10;10 push-ups&#10;10 sit-ups"></textarea>
+        <button class="save-btn" onclick="submitWorkout()">Save workout</button>
+      </div>
+    </div>`;
+  } else if(modal && modal.type==='assign'){
+    const k = modal.dateKey;
+    const list = assignments[k] || [];
+    const niceDate = new Date(k+'T00:00:00').toLocaleDateString('default',{weekday:'long', month:'long', day:'numeric'});
+    const items = workouts.length===0
+      ? `<div class="empty-state">Add a workout to your library first.</div>`
+      : workouts.map(w=>{
+          const checked = list.includes(w.id);
+          return `<div class="assign-item ${checked?'checked':''}" onclick="toggleAssign('${k}','${w.id}')">
+            <div class="name">${escapeHtml(w.name)}</div>
+            <div class="checkbox">${checked?'✓':''}</div>
+          </div>`;
+        }).join('');
+    modalHtml = `
+    <div class="overlay" onclick="if(event.target===this)closeModal()">
+      <div class="sheet">
+        <div class="sheet-head">
+          <div class="sheet-title">${niceDate}</div>
+          <button class="close-x" onclick="closeModal()">✕</button>
+        </div>
+        <div class="assign-list">${items}</div>
+      </div>
+    </div>`;
+  }
+
+  app.innerHTML = `
+    <header class="top">
+      <div>
+        <h1>Training Log</h1>
+        <div class="sub">Tap a day to assign a workout</div>
+      </div>
+    </header>
+
+    <div class="cal-card">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <div class="cal-month">${monthName} ${viewYear}</div>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid">${calCells}</div>
+    </div>
+
+    <div class="lib-head">
+      <h2>Workout library</h2>
+      <button class="add-btn" onclick="openAddWorkout()">+ Add workout</button>
+    </div>
+    <div class="workout-list">${libItems}</div>
+    ${modalHtml}
+  `;
+}
+
+function submitWorkout(){
+  const name = document.getElementById('wName').value.trim();
+  const type = document.getElementById('wType').value;
+  const duration = document.getElementById('wDuration').value;
+  const details = document.getElementById('wDetails').value.trim();
+  if(!name) return;
+  addWorkout({name, type, duration: duration ? parseInt(duration) : null, details: details || null});
+  modal = null;
+  render();
+}
+
+loadData();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
